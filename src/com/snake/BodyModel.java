@@ -1,5 +1,7 @@
 package com.snake;
 
+import java.awt.image.BufferedImage;
+
 /**
  * Created by Yoga2pro on 27.05.2016.
  */
@@ -14,8 +16,20 @@ public class BodyModel {
     private int snakeCoordinatesY[] = new int[100];
     private int width;
     private int height;
+    private BufferedImage snakeBodyImg;
 
-    public BodyModel(int startX, int startX1, int startY, int startY1, int width, int height){
+    public BufferedImage getSnakeBodyImg() {
+        return snakeBodyImg;
+    }
+
+    public void setSnakeBodyImg(BufferedImage snakeBodyImg) {
+        this.snakeBodyImg = snakeBodyImg;
+    }
+
+
+
+    public BodyModel(BufferedImage snakeBodyImg,int startX, int startX1, int startY, int startY1, int width, int height){
+        this.snakeBodyImg = snakeBodyImg;
         snakeCoordinatesX[0] = startX;
         snakeCoordinatesX[1] = startX1;
         snakeCoordinatesY[0] = startY;

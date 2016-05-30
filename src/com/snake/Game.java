@@ -15,8 +15,13 @@ public class Game extends JPanel implements ActionListener{
     ImageService imageService = new ImageService();
     BufferedImage fruitImg = imageService.getRandomFruit();
     Timer timer = new Timer(1000/speed, this);
-    BodyModel snakeBody = new BodyModel(10, 10, 9, 10, width, height);
+    BodyModel snakeBody = new BodyModel(imageService.getSnakeBlockImg(),10, 10, 9, 10, width, height);
     FruitModel apple = new FruitModel(height, width);
+
+    public JLabel getScore() {
+        JLabel score = new JLabel("Score : " + snakeBody.getBodyLength());
+        return score;
+    }
 
     public Game(){
         timer.start();
@@ -40,7 +45,7 @@ public class Game extends JPanel implements ActionListener{
     public void fillBodyTexture(Graphics graphics){
         for (int snakeBodyBlock = 0; snakeBodyBlock < snakeBody.getBodyLength(); snakeBodyBlock++){
             graphics.setColor(Color.YELLOW);
-            graphics.drawImage(imageService.snakeBlockImg,
+            graphics.drawImage(snakeBody.getSnakeBodyImg(),
                     snakeBody.getSnakeCoordinatesX()[snakeBodyBlock]*baseSize,
                     snakeBody.getSnakeCoordinatesY()[snakeBodyBlock]*baseSize,
                     null,
@@ -67,12 +72,11 @@ public class Game extends JPanel implements ActionListener{
     public static void main(String[] args) {
         JFrame window = new JFrame();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setSize(baseSize* height, baseSize*width+32);
+        window.setSize(baseSize* height, baseSize*(width+1));
         window.setResizable(false);
         window.setLocationRelativeTo(null);
         window.add(new Game());
         window.setVisible(true);
-
     }
 
     @Override
@@ -85,5 +89,21 @@ public class Game extends JPanel implements ActionListener{
                     snakeBody.increaseBodyLength();
         }
         repaint();
+    }
+
+    /*not used yet*/
+    public void changeBlockImageIfRequired(){
+        if(snakeBody.getSnakeDirection()==Direction.UP){
+            snakeBody.setSnakeBodyImg(imageService.getSnakeBlockImgUp());
+        }
+        if (snakeBody.getSnakeDirection()==Direction.DOWN){
+            snakeBody.setSnakeBodyImg((imageService.getSnakeBlockImgDown()));
+        }
+        if (snakeBody.getSnakeDirection()==Direction.LEFT){
+            snakeBody.setSnakeBodyImg((imageService.getSnakeBlockImgLeft()));
+        }
+        if (snakeBody.getSnakeDirection()==Direction.RIGHT){
+            snakeBody.setSnakeBodyImg((imageService.getSnakeBlockImgRight()));
+        }
     }
 }
