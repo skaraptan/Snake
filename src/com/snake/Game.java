@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 
 public class Game extends JPanel implements ActionListener{
 
@@ -11,11 +12,11 @@ public class Game extends JPanel implements ActionListener{
     public static final int height = 20;
     public static final int width = 20;
     public static final int speed =  8;
-
+    ImageService imageService = new ImageService();
+    BufferedImage fruitImg = imageService.getRandomFruit();
     Timer timer = new Timer(1000/speed, this);
     BodyModel snakeBody = new BodyModel(10, 10, 9, 10, width, height);
-    AppleModel apple = new AppleModel(height, width);
-
+    FruitModel apple = new FruitModel(height, width);
 
     public Game(){
         timer.start();
@@ -39,25 +40,25 @@ public class Game extends JPanel implements ActionListener{
     public void fillBodyTexture(Graphics graphics){
         for (int snakeBodyBlock = 0; snakeBodyBlock < snakeBody.getBodyLength(); snakeBodyBlock++){
             graphics.setColor(Color.YELLOW);
-            graphics.fillRect(
+            graphics.drawImage(imageService.snakeBlockImg,
                     snakeBody.getSnakeCoordinatesX()[snakeBodyBlock]*baseSize,
                     snakeBody.getSnakeCoordinatesY()[snakeBodyBlock]*baseSize,
-                    baseSize-1,
-                    baseSize-1);
+                    null,
+                    null);
 
         }
     }
 
     /*Draw apples*/
     public void fillAppleTexture(Graphics graphics){
-        graphics.setColor(Color.CYAN);
-        graphics.fillRect(apple.getAppleCoordinateX()*baseSize, apple.getAppleCoordinateY()*baseSize, baseSize, baseSize);
+        graphics.drawImage(fruitImg ,apple.getAppleCoordinateX()*baseSize, apple.getAppleCoordinateY()*baseSize, null , null);
     }
+
     @Override
     public void paint(Graphics graphics){
         graphics.setColor(new Color(10, 150, 50));
-        graphics.fillRect(0, 0 , baseSize* height, baseSize*width );
-        fillTexture(graphics);
+        graphics.drawImage(imageService.getGrassImg() ,0, 0 , null, null);
+       // fillTexture(graphics);
         fillBodyTexture(graphics);
         fillAppleTexture(graphics);
 
@@ -66,7 +67,7 @@ public class Game extends JPanel implements ActionListener{
     public static void main(String[] args) {
         JFrame window = new JFrame();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setSize(baseSize* height, baseSize*width);
+        window.setSize(baseSize* height, baseSize*width+32);
         window.setResizable(false);
         window.setLocationRelativeTo(null);
         window.add(new Game());
@@ -79,6 +80,7 @@ public class Game extends JPanel implements ActionListener{
         snakeBody.move();
         if(snakeBody.getSnakeCoordinatesX()[0]==apple.getAppleCoordinateX() &&
                 snakeBody.getSnakeCoordinatesY()[0]==apple.getAppleCoordinateY()){
+                    fruitImg = imageService.getRandomFruit();
                     apple.generateNewApple();
                     snakeBody.increaseBodyLength();
         }

@@ -1,7 +1,5 @@
 package com.snake;
 
-import javax.swing.*;
-
 /**
  * Created by Yoga2pro on 27.05.2016.
  */
@@ -52,25 +50,28 @@ public class BodyModel {
         bodyLength++;
     }
 
-    public void changeCoordinatesIfReqired(){
-        if(snakeCoordinatesX[0]==-1 && snakeDirection==Direction.LEFT){
+    public void changeCoordinatesIfRequired(){
+        if(snakeCoordinatesX[0]<0 && snakeDirection==Direction.LEFT){
             snakeCoordinatesX[0]=width;
         }
-        if(snakeCoordinatesX[0]==width && snakeDirection==Direction.RIGHT){
+        if(snakeCoordinatesX[0]>=width && snakeDirection==Direction.RIGHT){
             snakeCoordinatesX[0]=0;
         }
-        if(snakeCoordinatesY[0]==-1 && snakeDirection==Direction.UP){
+        if(snakeCoordinatesY[0]<0 && snakeDirection==Direction.UP){
             snakeCoordinatesY[0]=height;
         }
-        if(snakeCoordinatesY[0]==height && snakeDirection==Direction.DOWN){
+        if(snakeCoordinatesY[0]>=height && snakeDirection==Direction.DOWN){
             snakeCoordinatesY[0]=0;
         }
     }
     public void move(){
+
         for(int blockId = bodyLength; blockId > 0; blockId--){
             snakeCoordinatesX[blockId] = snakeCoordinatesX[blockId-1];
             snakeCoordinatesY[blockId] = snakeCoordinatesY[blockId-1];
         }
+
+
         if(snakeDirection==Direction.RIGHT){
             snakeCoordinatesX[0]++;
         }
@@ -88,7 +89,8 @@ public class BodyModel {
                 bodyLength = blockId;
             }
         }
-        changeCoordinatesIfReqired();
+        changeCoordinatesIfRequired();
+
     }
 
 }

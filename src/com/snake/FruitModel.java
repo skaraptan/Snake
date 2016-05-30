@@ -5,7 +5,7 @@ import java.util.Random;
 /**
  * Created by Yoga2pro on 29.05.2016.
  */
-public class AppleModel {
+public class FruitModel {
     private int appleCoordinateX;
     private int appleCoordinateY;
     private int fieldWidth;
@@ -30,12 +30,10 @@ public class AppleModel {
         this.appleCoordinateY = appleCoordinateY;
     }
 
-    public AppleModel(int fieldHeight, int fieldWidth){
-        this.fieldHeight = fieldHeight;
-        this.fieldWidth = fieldWidth;
-        this.fieldBaseSize = fieldBaseSize;
-        appleCoordinateX = random.nextInt(fieldWidth);
-        appleCoordinateY = random.nextInt(fieldHeight);
+    public FruitModel(int fieldHeight, int fieldWidth){
+        this.fieldHeight = fieldHeight-1;
+        this.fieldWidth = fieldWidth-1;
+        generateNewApple();
     }
 
     public void generateNewApple(){
