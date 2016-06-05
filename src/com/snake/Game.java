@@ -5,6 +5,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 
 public class Game extends JPanel implements ActionListener{
 
@@ -12,17 +16,22 @@ public class Game extends JPanel implements ActionListener{
     public static final int height = 20;
     public static final int width = 20;
     public static final int speed =  8;
+    private Socket socket;
+    SnakeCoordinatesSender snakeCoordinatesSender;
+    ObjectInputStream objectInputStream;
     ImageService imageService = new ImageService();
     BufferedImage fruitImg = imageService.getRandomFruit();
     Timer timer = new Timer(1000/speed, this);
     BodyModel snakeBody = new BodyModel(imageService.getSnakeBlockImg(),10, 10, 9, 10, width, height);
-    FruitModel apple = new FruitModel(height, width);
+    FruitModel apple = new FruitModel(height, width, snakeBody);
 
     public JLabel getScore() {
         JLabel score = new JLabel("Score : " + snakeBody.getBodyLength());
         return score;
     }
-
+    public Coordinates[] getCurrentSnakeCoordinates(){
+        return snakeBody.getSnakeCoordinates();
+    }
     public Game(){
         timer.start();
         addKeyListener(new ControlService(snakeBody));
@@ -46,8 +55,8 @@ public class Game extends JPanel implements ActionListener{
         for (int snakeBodyBlock = 0; snakeBodyBlock < snakeBody.getBodyLength(); snakeBodyBlock++){
             graphics.setColor(Color.YELLOW);
             graphics.drawImage(snakeBody.getSnakeBodyImg(),
-                    snakeBody.getSnakeCoordinatesX()[snakeBodyBlock]*baseSize,
-                    snakeBody.getSnakeCoordinatesY()[snakeBodyBlock]*baseSize,
+                    snakeBody.getSnakeCoordinates()[snakeBodyBlock].getX()*baseSize,
+                    snakeBody.getSnakeCoordinates()[snakeBodyBlock].getY()*baseSize,
                     null,
                     null);
 
@@ -56,7 +65,7 @@ public class Game extends JPanel implements ActionListener{
 
     /*Draw apples*/
     public void fillAppleTexture(Graphics graphics){
-        graphics.drawImage(fruitImg ,apple.getAppleCoordinateX()*baseSize, apple.getAppleCoordinateY()*baseSize, null , null);
+        graphics.drawImage(fruitImg ,apple.getAppleCoordinates().getX()*baseSize, apple.getAppleCoordinates().getY()*baseSize, null , null);
     }
 
     @Override
@@ -69,7 +78,28 @@ public class Game extends JPanel implements ActionListener{
 
     }
 
-    public static void main(String[] args) {
+    public void process(){
+        try {
+            socket = new Socket("localhost", 1234);
+            snakeCoordinatesSender = new SnakeCoordinatesSender(socket.getOutputStream());
+            Thread thread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        while (true) {
+                            snakeCoordinatesSender.writeObject(getCurrentSnakeCoordinates());
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            thread.start();
+
+        }
+        catch (Exception ex){
+            ex.printStackTrace();
+        }
         JFrame window = new JFrame();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setSize(baseSize* height, baseSize*(width+1));
@@ -82,11 +112,10 @@ public class Game extends JPanel implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         snakeBody.move();
-        if(snakeBody.getSnakeCoordinatesX()[0]==apple.getAppleCoordinateX() &&
-                snakeBody.getSnakeCoordinatesY()[0]==apple.getAppleCoordinateY()){
-                    fruitImg = imageService.getRandomFruit();
-                    apple.generateNewApple();
-                    snakeBody.increaseBodyLength();
+        if (snakeBody.getSnakeCoordinates()[0].getX()==apple.getAppleCoordinates().getX() && snakeBody.getSnakeCoordinates()[0].getY()==apple.getAppleCoordinates().getY()) {
+            fruitImg = imageService.getRandomFruit();
+            apple.generateNewApple(snakeBody);
+            snakeBody.increaseBodyLength();
         }
         repaint();
     }
