@@ -98,7 +98,6 @@ public class BodyModel implements Serializable{
             }
         }
         changeCoordinatesIfRequired();
-
     }
 
 }

@@ -2,6 +2,8 @@ package com.snake;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 /**
  * Created by Yoga2pro on 29.05.2016.
@@ -10,8 +12,9 @@ public class ControlService extends KeyAdapter {
 
     private int keyCode;
     private BodyModel bodyModel;
+    private ObjectOutputStream oos;
 
-    public ControlService(BodyModel bodyModel){
+    public ControlService(BodyModel bodyModel) {
         this.bodyModel = bodyModel;
     }
     public int getKeyCode() {

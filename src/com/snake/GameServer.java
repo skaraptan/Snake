@@ -29,9 +29,12 @@ public class GameServer extends Thread{
                 System.out.println("Connected from" + socket.getInetAddress());
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
                     while(true) {
+                        System.out.println("Started");
                         Coordinates[] snake = (Coordinates[]) objectInputStream.readObject();
-                        snakeCoordinates.add(snake);
-                        System.out.print(snakeCoordinates.get(0)[0].getX());
+                        System.out.println("Data received" + snake[0].getX());
+                        if(!socket.isConnected()){
+                            socket.close();
+                        }
                     }
 
             }

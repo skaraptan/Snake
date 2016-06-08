@@ -1,5 +1,6 @@
 package com.snake;
 
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -17,14 +18,13 @@ public class Game extends JPanel implements ActionListener{
     public static final int width = 20;
     public static final int speed =  8;
     private Socket socket;
-    SnakeCoordinatesSender snakeCoordinatesSender;
     ObjectInputStream objectInputStream;
     ImageService imageService = new ImageService();
     BufferedImage fruitImg = imageService.getRandomFruit();
     Timer timer = new Timer(1000/speed, this);
     BodyModel snakeBody = new BodyModel(imageService.getSnakeBlockImg(),10, 10, 9, 10, width, height);
     FruitModel apple = new FruitModel(height, width, snakeBody);
-
+    SnakeCoordinatesSender snakeCoordinatesSender;
     public JLabel getScore() {
         JLabel score = new JLabel("Score : " + snakeBody.getBodyLength());
         return score;
@@ -32,10 +32,11 @@ public class Game extends JPanel implements ActionListener{
     public Coordinates[] getCurrentSnakeCoordinates(){
         return snakeBody.getSnakeCoordinates();
     }
-    public Game(){
+    public Game() throws IOException{
         timer.start();
         addKeyListener(new ControlService(snakeBody));
         setFocusable(true);
+        socket = new Socket("localhost", 1234);
     }
 
     /*Draw game field*/
@@ -75,31 +76,9 @@ public class Game extends JPanel implements ActionListener{
        // fillTexture(graphics);
         fillBodyTexture(graphics);
         fillAppleTexture(graphics);
-
     }
 
-    public void process(){
-        try {
-            socket = new Socket("localhost", 1234);
-            snakeCoordinatesSender = new SnakeCoordinatesSender(socket.getOutputStream());
-            Thread thread = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        while (true) {
-                            snakeCoordinatesSender.writeObject(getCurrentSnakeCoordinates());
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-            thread.start();
-
-        }
-        catch (Exception ex){
-            ex.printStackTrace();
-        }
+    public synchronized void process() throws IOException, InterruptedException {
         JFrame window = new JFrame();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setSize(baseSize* height, baseSize*(width+1));
@@ -107,6 +86,11 @@ public class Game extends JPanel implements ActionListener{
         window.setLocationRelativeTo(null);
         window.add(new Game());
         window.setVisible(true);
+        snakeCoordinatesSender = new SnakeCoordinatesSender(snakeBody.getSnakeCoordinates(), new ObjectOutputStream(socket.getOutputStream()));
+        while(true) {
+            snakeCoordinatesSender.start();
+            Thread.sleep(1000);
+        }
     }
 
     @Override
