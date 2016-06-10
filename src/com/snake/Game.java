@@ -18,14 +18,14 @@ public class Game extends JPanel implements ActionListener{
     public static final int width = 20;
     public static final int speed =  8;
     private Socket socket;
-    ObjectInputStream objectInputStream;
     ImageService imageService = new ImageService();
     BufferedImage fruitImg = imageService.getRandomFruit();
     Timer timer = new Timer(1000/speed, this);
     BodyModel snakeBody = new BodyModel(imageService.getSnakeBlockImg(),9, 10, 10, 10, width, height);
+    BodyModel enemySnakeBody = new BodyModel(imageService.getEnemySnakeBlockImg(), 1 , 2, 1, 1, width, height);
     FruitModel apple = new FruitModel(height, width, snakeBody);
-    SnakeCoordinatesSender snakeCoordinatesSender;
     ObjectOutputStream objectOutputStream;
+    ObjectInputStream objectInputStream;
     public JLabel getScore() {
         JLabel score = new JLabel("Score : " + snakeBody.getBodyLength());
         return score;
@@ -35,6 +35,9 @@ public class Game extends JPanel implements ActionListener{
         addKeyListener(new ControlService(snakeBody));
         setFocusable(true);
         timer.start();
+        socket = new Socket("localhost", 1234);
+        objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+        objectInputStream = new ObjectInputStream(socket.getInputStream());
     }
 
     /*Draw game field*/
@@ -56,6 +59,15 @@ public class Game extends JPanel implements ActionListener{
             graphics.drawImage(snakeBody.getSnakeBodyImg(),
                     snakeBody.getSnakeCoordinates()[snakeBodyBlock].getX()*baseSize,
                     snakeBody.getSnakeCoordinates()[snakeBodyBlock].getY()*baseSize,
+                    null,
+                    null);
+
+        }
+        for (int snakeBodyBlock = 0; snakeBodyBlock < enemySnakeBody.getBodyLength(); snakeBodyBlock++){
+            graphics.setColor(Color.YELLOW);
+            graphics.drawImage(enemySnakeBody.getSnakeBodyImg(),
+                    enemySnakeBody.getSnakeCoordinates()[snakeBodyBlock].getX()*baseSize,
+                    enemySnakeBody.getSnakeCoordinates()[snakeBodyBlock].getY()*baseSize,
                     null,
                     null);
 
@@ -82,19 +94,29 @@ public class Game extends JPanel implements ActionListener{
         window.setSize(baseSize* height, baseSize*(width+1));
         window.setResizable(false);
         window.setLocationRelativeTo(null);
-        window.add(new Game());
+        window.add(this);
         window.setVisible(true);
     }
-    public void sentLength(int bodyLength){
+    public void sentCoordinates(BodyModel snakeBody){
         try {
-            socket = new Socket("localhost", 1234);
-            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-            oos.writeInt(bodyLength);
-            oos.flush();
+            objectOutputStream.writeObject(snakeBody.getSnakeCoordinates());
+            objectOutputStream.flush();
+            objectOutputStream.reset();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    public void getEnemyCoordinates(){
+        try {
+            Coordinates[] enemySnakeCoordinates = (Coordinates[]) objectInputStream.readObject();
+                enemySnakeBody.setSnakeCoordinates(enemySnakeCoordinates);
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public synchronized void actionPerformed(ActionEvent e) {
         snakeBody.move();
@@ -102,9 +124,9 @@ public class Game extends JPanel implements ActionListener{
             fruitImg = imageService.getRandomFruit();
             apple.generateNewApple(snakeBody);
             snakeBody.increaseBodyLength();
-            System.out.println(snakeBody.getBodyLength());
-            sentLength(snakeBody.getBodyLength());
+            getEnemyCoordinates();
         }
+        sentCoordinates(snakeBody);
         repaint();
     }
 

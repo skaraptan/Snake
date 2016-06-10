@@ -19,7 +19,7 @@ public class GameServer extends Thread{
     private int snakeLenght2;
     private ObjectOutputStream objectOutputStream;
     private ObjectInputStream objectInputStream;
-    private Vector<InetAddress> clientAddress = new Vector<>();
+    private static Vector<GameServer> players = new Vector<>();
     public GameServer(){
     }
 
@@ -28,16 +28,10 @@ public class GameServer extends Thread{
             serverSocket = new ServerSocket(port);
             while (true) {
                 Socket socket = serverSocket.accept();
+                players.add(this);
                 System.out.println("Connected from" + socket.getInetAddress());
-                if(!clientAddress.contains(socket.getInetAddress())){
-                    clientAddress.add(socket.getInetAddress());
+                new NetworkService(socket).start();
                 }
-                objectInputStream = new ObjectInputStream(socket.getInputStream());
-                int snake;
-                        System.out.println("Started");
-                        snake = objectInputStream.readInt();
-                        System.out.println(snake);
-            }
         }
         catch (Exception e){
             System.err.println(e);

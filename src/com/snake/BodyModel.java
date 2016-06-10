@@ -10,6 +10,8 @@ public class BodyModel implements Serializable{
 
 
     private Direction snakeDirection = Direction.RIGHT;
+
+
     private Coordinates[] snakeCoordinates = new Coordinates[100];
     private int bodyLength = 2;
     private int width;
@@ -48,6 +50,10 @@ public class BodyModel implements Serializable{
 
     public void setBodyLength(int bodyLength) {
         this.bodyLength = bodyLength;
+    }
+
+    public void setSnakeCoordinates(Coordinates[] snakeCoordinates) {
+        this.snakeCoordinates = snakeCoordinates;
     }
 
     public Coordinates[] getSnakeCoordinates(){

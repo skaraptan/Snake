@@ -17,6 +17,7 @@ public class ImageService {
     private BufferedImage snakeBlockImgDown;
     private BufferedImage snakeBlockImgLeft;
     private BufferedImage snakeBlockImgRight;
+    private BufferedImage enemySnakeBlockImg;
     private Random rand = new Random();
 
     public ImageService(){
@@ -26,6 +27,7 @@ public class ImageService {
             fruitImg[2] = ImageIO.read(new File("grape.png"));
             grassImg = ImageIO.read(new File("grass.jpg"));
             snakeBlockImg = ImageIO.read(new File("bug.png"));
+            enemySnakeBlockImg = ImageIO.read(new File("bug_enemy.png"));
             snakeBlockImgUp = ImageIO.read(new File("bug.png"));
             snakeBlockImgDown = ImageIO.read(new File("bug_down.png"));
             snakeBlockImgLeft = ImageIO.read(new File("bug_left.png"));
@@ -55,5 +57,8 @@ public class ImageService {
     }
     public BufferedImage getSnakeBlockImgRight(){
         return  snakeBlockImgRight;
+    }
+    public BufferedImage getEnemySnakeBlockImg(){
+        return enemySnakeBlockImg;
     }
 }
