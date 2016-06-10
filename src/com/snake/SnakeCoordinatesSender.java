@@ -9,7 +9,7 @@ import java.net.Socket;
 /**
  * Created by Yoga2pro on 04.06.2016.
  */
-public class SnakeCoordinatesSender extends Thread{
+class SnakeCoordinatesSender extends Thread{
 
     private Coordinates[] snakeCoordinates;
     private ObjectOutputStream objectOutputStream;
@@ -21,21 +21,23 @@ public class SnakeCoordinatesSender extends Thread{
     }
 
     public SnakeCoordinatesSender(Coordinates[] snakeCoordinates, ObjectOutputStream objectOutputStream){
-        this.snakeCoordinates = snakeCoordinates;
+        this.snakeCoordinates = snakeCoordinates.clone();
         this.objectOutputStream = objectOutputStream;
     }
 
     @Override
-    public synchronized void run() {
+    public void run() {
+        while(true) {
             try {
-                objectOutputStream.writeObject(snakeCoordinates);
+                System.out.println(snakeCoordinates[0]);
+                objectOutputStream.writeObject(snakeCoordinates.clone());
                 objectOutputStream.flush();
-                sleep(100);
-                notify();
+                sleep(500);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
     }
 }

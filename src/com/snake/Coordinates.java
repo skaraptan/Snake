@@ -33,6 +33,8 @@ public class Coordinates implements Serializable{
         this.y = y;
     }
 
-
+    public String toString(){
+        return ("X: " + x  + "Y:  " +  y );
+    }
 
 }

@@ -3,6 +3,7 @@ package com.snake;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Vector;
@@ -14,10 +15,11 @@ public class GameServer extends Thread{
 
     private ServerSocket serverSocket;
     private int port = 1234;
-    private Vector<Coordinates[]> snakeCoordinates = new Vector<>();
+    private int snakeLenght1;
+    private int snakeLenght2;
     private ObjectOutputStream objectOutputStream;
     private ObjectInputStream objectInputStream;
-
+    private Vector<InetAddress> clientAddress = new Vector<>();
     public GameServer(){
     }
 
@@ -27,16 +29,14 @@ public class GameServer extends Thread{
             while (true) {
                 Socket socket = serverSocket.accept();
                 System.out.println("Connected from" + socket.getInetAddress());
+                if(!clientAddress.contains(socket.getInetAddress())){
+                    clientAddress.add(socket.getInetAddress());
+                }
                 objectInputStream = new ObjectInputStream(socket.getInputStream());
-                    while(true) {
+                int snake;
                         System.out.println("Started");
-                        Coordinates[] snake = (Coordinates[]) objectInputStream.readObject();
-                        System.out.println("Data received" + snake[0].getX());
-                        if(!socket.isConnected()){
-                            socket.close();
-                        }
-                    }
-
+                        snake = objectInputStream.readInt();
+                        System.out.println(snake);
             }
         }
         catch (Exception e){
