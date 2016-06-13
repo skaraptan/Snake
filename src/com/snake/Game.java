@@ -16,20 +16,16 @@ public class Game extends JPanel implements ActionListener{
     public static final int baseSize = 32;
     public static final int height = 20;
     public static final int width = 20;
-    public static final int speed =  8;
+    public static final int speed =  7;
     private Socket socket;
     ImageService imageService = new ImageService();
     BufferedImage fruitImg = imageService.getRandomFruit();
     Timer timer = new Timer(1000/speed, this);
     BodyModel snakeBody = new BodyModel(imageService.getSnakeBlockImg(),9, 10, 10, 10, width, height);
-    BodyModel enemySnakeBody = new BodyModel(imageService.getEnemySnakeBlockImg(), 1 , 2, 1, 1, width, height);
+    BodyModel enemySnakeBody = new BodyModel(imageService.getEnemySnakeBlockImg(), -1, -1, -1, -1, width, height);
     FruitModel apple = new FruitModel(height, width, snakeBody);
     ObjectOutputStream objectOutputStream;
     ObjectInputStream objectInputStream;
-    public JLabel getScore() {
-        JLabel score = new JLabel("Score : " + snakeBody.getBodyLength());
-        return score;
-    }
 
     public Game() throws IOException{
         addKeyListener(new ControlService(snakeBody));
@@ -38,6 +34,7 @@ public class Game extends JPanel implements ActionListener{
         socket = new Socket("localhost", 1234);
         objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
         objectInputStream = new ObjectInputStream(socket.getInputStream());
+        new ClientSnakeCoordinatesService(objectOutputStream, objectInputStream, enemySnakeBody, snakeBody).start();
     }
 
     /*Draw game field*/
@@ -51,11 +48,16 @@ public class Game extends JPanel implements ActionListener{
         }
     }
 
-
+    public void showScore(Graphics graphics){
+        graphics.setFont(new Font("TimesRoman" , Font.BOLD, 30));
+        graphics.setColor(new Color(0, 53, 255));
+        graphics.drawString("You : " + snakeBody.getBodyLength(), 500, 600 );
+        graphics.setColor(Color.WHITE);
+        graphics.drawString("Enemy : " + enemySnakeBody.getBodyLength(), 1, 600);
+    }
     /*Draw snake body model*/
     public void fillBodyTexture(Graphics graphics){
         for (int snakeBodyBlock = 0; snakeBodyBlock < snakeBody.getBodyLength(); snakeBodyBlock++){
-            graphics.setColor(Color.YELLOW);
             graphics.drawImage(snakeBody.getSnakeBodyImg(),
                     snakeBody.getSnakeCoordinates()[snakeBodyBlock].getX()*baseSize,
                     snakeBody.getSnakeCoordinates()[snakeBodyBlock].getY()*baseSize,
@@ -64,7 +66,6 @@ public class Game extends JPanel implements ActionListener{
 
         }
         for (int snakeBodyBlock = 0; snakeBodyBlock < enemySnakeBody.getBodyLength(); snakeBodyBlock++){
-            graphics.setColor(Color.YELLOW);
             graphics.drawImage(enemySnakeBody.getSnakeBodyImg(),
                     enemySnakeBody.getSnakeCoordinates()[snakeBodyBlock].getX()*baseSize,
                     enemySnakeBody.getSnakeCoordinates()[snakeBodyBlock].getY()*baseSize,
@@ -86,6 +87,7 @@ public class Game extends JPanel implements ActionListener{
        // fillTexture(graphics);
         fillBodyTexture(graphics);
         fillAppleTexture(graphics);
+        showScore(graphics);
     }
 
     public synchronized void process() throws IOException, InterruptedException {
@@ -97,25 +99,6 @@ public class Game extends JPanel implements ActionListener{
         window.add(this);
         window.setVisible(true);
     }
-    public void sentCoordinates(BodyModel snakeBody){
-        try {
-            objectOutputStream.writeObject(snakeBody.getSnakeCoordinates());
-            objectOutputStream.flush();
-            objectOutputStream.reset();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void getEnemyCoordinates(){
-        try {
-            Coordinates[] enemySnakeCoordinates = (Coordinates[]) objectInputStream.readObject();
-                enemySnakeBody.setSnakeCoordinates(enemySnakeCoordinates);
-
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     public synchronized void actionPerformed(ActionEvent e) {
@@ -124,9 +107,13 @@ public class Game extends JPanel implements ActionListener{
             fruitImg = imageService.getRandomFruit();
             apple.generateNewApple(snakeBody);
             snakeBody.increaseBodyLength();
-            getEnemyCoordinates();
         }
-        sentCoordinates(snakeBody);
+        for (int blockId = snakeBody.getBodyLength()-1 ; blockId > 0; blockId--){
+            if (enemySnakeBody.getSnakeCoordinates()[0].getX() == snakeBody.getSnakeCoordinates()[blockId].getX() &&
+                    enemySnakeBody.getSnakeCoordinates()[0].getY() == snakeBody.getSnakeCoordinates()[blockId].getY()){
+                snakeBody.setBodyLength(blockId);
+            }
+        }
         repaint();
     }
 

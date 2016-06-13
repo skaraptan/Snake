@@ -15,6 +15,8 @@ public class NetworkService extends Thread {
     private ObjectInputStream objectInputStream;
     private Coordinates[] enemyCoordinates;
     private Coordinates[] currentPlayerCoordinates;
+    private int currentPlayerBodyLength;
+    private int enemyBodyLength;
     static Vector<NetworkService> players = new Vector<>();
     public NetworkService(Socket socket){
         this.socket = socket;
@@ -31,15 +33,11 @@ public class NetworkService extends Thread {
             while(true) {
                 if (players.size() == 2) {
                     readCurrentPlayerSnakeCoordinates();
-                    sendCurrentPlayerSnakeCoordinatesToEnemy();
                     readEnemySnakeCoordinates();
                     sendEnemySnakeCoordinatesToClient();
-//                    System.out.println(currentPlayerCoordinates[0].getX() + "  ---  " + currentPlayerCoordinates[0].getY());
-//                    System.out.println(enemyCoordinates[0].getX() + "  ---  " + enemyCoordinates[0].getY() + "\n\n");
                 }
-                sleep(100);
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException  e) {
             e.printStackTrace();
         }
     }
@@ -48,58 +46,30 @@ public class NetworkService extends Thread {
         for(NetworkService player : players) {
             synchronized (players) {
                 if(player != this) {
-                    try {
-                        this.enemyCoordinates = (Coordinates[]) player.objectInputStream.readObject();
-                    } catch (IOException | ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
+                        this.enemyCoordinates = player.currentPlayerCoordinates;
+                        this.enemyBodyLength = player.currentPlayerBodyLength;
                 }
             }
         }
     }
 
     private void readCurrentPlayerSnakeCoordinates(){
-        for(NetworkService player : players) {
-            synchronized (players) {
-                if(player == this) {
                     try {
                         currentPlayerCoordinates = (Coordinates[]) objectInputStream.readObject();
+                        currentPlayerBodyLength = (int) objectInputStream.readObject();
                     } catch (IOException | ClassNotFoundException e) {
                         e.printStackTrace();
                     }
                 }
-            }
-        }
-    }
 
-    public void sendEnemySnakeCoordinatesToClient(){
-        for(NetworkService player : players) {
-            synchronized (players) {
-                if(player == this) {
+    private void sendEnemySnakeCoordinatesToClient(){
                     try {
                         objectOutputStream.writeObject(enemyCoordinates);
+                        objectOutputStream.writeObject(enemyBodyLength);
                         objectOutputStream.flush();
                         objectOutputStream.reset();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
-            }
-        }
-    }
-    public void sendCurrentPlayerSnakeCoordinatesToEnemy(){
-        for(NetworkService player : players) {
-            synchronized (players) {
-                if(player != this) {
-                    try {
-                        objectOutputStream.writeObject(this.currentPlayerCoordinates);
-                        objectOutputStream.flush();
-                        objectOutputStream.reset();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
+                 }
 }
