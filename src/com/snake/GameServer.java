@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Vector;
 
 /**
@@ -14,24 +15,30 @@ import java.util.Vector;
 public class GameServer extends Thread{
 
     private ServerSocket serverSocket;
-    private int port = 1234;
+    private int port;
     private int snakeLenght1;
     private int snakeLenght2;
     private ObjectOutputStream objectOutputStream;
     private ObjectInputStream objectInputStream;
-    public GameServer(){
+    public GameServer(int port){
+        this.port = port;
     }
 
     public void run(){
         try {
             serverSocket = new ServerSocket(port);
+            System.out.println("Server is running on port  " + port);
             while (true) {
                 Socket socket = serverSocket.accept();
                 System.out.println("Connected from" + socket.getInetAddress());
                 new NetworkService(socket).start();
                 }
         }
-        catch (Exception e){
+        catch (SocketException se){
+
+        }
+        catch (IOException ioe){
+
         }
     }
 }

@@ -18,6 +18,7 @@ public class NetworkService extends Thread {
     private int currentPlayerBodyLength;
     private int enemyBodyLength;
     static Vector<NetworkService> players = new Vector<>();
+    static FruitModel apple;
     public NetworkService(Socket socket){
         this.socket = socket;
     }
@@ -38,7 +39,6 @@ public class NetworkService extends Thread {
                 }
             }
         } catch (IOException  e) {
-            e.printStackTrace();
         }
     }
 
@@ -58,7 +58,6 @@ public class NetworkService extends Thread {
                         currentPlayerCoordinates = (Coordinates[]) objectInputStream.readObject();
                         currentPlayerBodyLength = (int) objectInputStream.readObject();
                     } catch (IOException | ClassNotFoundException e) {
-                        e.printStackTrace();
                     }
                 }
 
@@ -69,7 +68,6 @@ public class NetworkService extends Thread {
                         objectOutputStream.flush();
                         objectOutputStream.reset();
                     } catch (IOException e) {
-                        e.printStackTrace();
                     }
                  }
 }

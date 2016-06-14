@@ -17,24 +17,29 @@ public class Game extends JPanel implements ActionListener{
     public static final int height = 20;
     public static final int width = 20;
     public static final int speed =  7;
+    private int port;
+    private String address;
     private Socket socket;
     ImageService imageService = new ImageService();
     BufferedImage fruitImg = imageService.getRandomFruit();
     Timer timer = new Timer(1000/speed, this);
     BodyModel snakeBody = new BodyModel(imageService.getSnakeBlockImg(),9, 10, 10, 10, width, height);
-    BodyModel enemySnakeBody = new BodyModel(imageService.getEnemySnakeBlockImg(), -1, -1, -1, -1, width, height);
+    BodyModel enemySnakeBody = new BodyModel(imageService.getEnemySnakeBlockImg(), 0, 0, 0, 0, width, height);
     FruitModel apple = new FruitModel(height, width, snakeBody);
     ObjectOutputStream objectOutputStream;
     ObjectInputStream objectInputStream;
 
-    public Game() throws IOException{
+    public Game(int port, String address) throws IOException{
+        this.port = port;
+        this.address = address;
         addKeyListener(new ControlService(snakeBody));
         setFocusable(true);
         timer.start();
-        socket = new Socket("localhost", 1234);
+        socket = new Socket(address, port);
         objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
         objectInputStream = new ObjectInputStream(socket.getInputStream());
         new ClientSnakeCoordinatesService(objectOutputStream, objectInputStream, enemySnakeBody, snakeBody).start();
+        enemySnakeBody.setBodyLength(0);
     }
 
     /*Draw game field*/
