@@ -41,7 +41,7 @@ public class GameMenu extends JFrame {
         address = new JTextField("localhost");
         address.setFont(new Font("TimesRoman", Font.BOLD, 20));
         description = new JTextArea(" Hello everybody, \n you are playing multiplayer snake game. \n In order to play this game, please start server \n " +
-                "on set port. Avoid using of systems ports. \n When the server is started, you, and other player \n can simply start new game providing port and server address " +
+                "on set port. Avoid using systems ports. \n When the server is started, you, and other player \n can simply start new game providing port and server address " +
                 "\n Have fun :)");
         description.setFont(new Font("TimesRoman", Font.BOLD, 20));
         description.setEditable(false);
