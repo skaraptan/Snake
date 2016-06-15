@@ -24,7 +24,7 @@ public class Game extends JPanel implements ActionListener{
     BufferedImage fruitImg = imageService.getRandomFruit();
     Timer timer = new Timer(1000/speed, this);
     BodyModel snakeBody = new BodyModel(imageService.getSnakeBlockImg(),9, 10, 10, 10, width, height);
-    BodyModel enemySnakeBody = new BodyModel(imageService.getEnemySnakeBlockImg(), 0, 0, 0, 0, width, height);
+    BodyModel enemySnakeBody = new BodyModel(imageService.getEnemySnakeBlockImg(), -2, -2, -2, -2, width, height);
     FruitModel apple = new FruitModel(height, width, snakeBody);
     ObjectOutputStream objectOutputStream;
     ObjectInputStream objectInputStream;
